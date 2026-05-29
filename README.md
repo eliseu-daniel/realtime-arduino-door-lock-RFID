@@ -66,6 +66,61 @@ npm run dev
 
 ---
 
+## Deploy em nuvem (upgrade futuro)
+
+Quando precisar que o back-end rode em um servidor cloud (VPS, AWS, etc.) mantendo o Arduino conectado via USB em uma máquina local, use o **Serial Relay**.
+
+### Arquitetura
+
+```
+┌─────────────────────────┐       WebSocket        ┌──────────────────────┐
+│  Máquina local          │◄──────────────────────►│  Servidor Nuvem      │
+│  (com Arduino USB)      │                         │                      │
+│                         │                         │  - API REST (3000)   │
+│  node serial-relay.js   │                         │  - WebSocket server  │
+│  ┌──────────────────┐   │                         │  - MySQL             │
+│  │ Serial Port      │   │                         │  - JWT               │
+│  │ WebSocket client │   │                         │                      │
+│  └────────┬─────────┘   │                         └──────────────────────┘
+│           │             │
+│      ┌────┴────┐        │
+│      │ Arduino │        │
+│      └─────────┘        │
+└─────────────────────────┘
+```
+
+### Passo a passo
+
+**1. Faça deploy do back-end na nuvem**
+
+```bash
+# No servidor cloud
+git clone <seu-repositorio> /app
+cd /app
+docker compose up -d
+```
+
+Configure as variáveis `DB_HOST`, `JWT_SECRET`, etc. no `.env` do servidor.
+
+**2. Na máquina local com Arduino**
+
+```bash
+# Configure o .env com os dados do servidor cloud
+RELAY_SERVER_URL=ws://seu-servidor:3000
+RELAY_AUTH_TOKEN=<token_jwt_de_um_admin>
+
+# Rode o relay
+node serial-relay.js
+```
+
+O relay abre a porta serial do Arduino, conecta no WebSocket do servidor cloud e faz a ponte bidirecional:
+- Tag RFID lida → serial → relay → cloud → WebSocket clients
+- Comando `OPEN_GATE` via app → cloud → relay → serial → Arduino
+
+> ⚠️ O relay precisa do `serialport` instalado (`npm install` já inclui).
+
+---
+
 ## Base URL
 
 ```
