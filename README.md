@@ -1,5 +1,71 @@
 # API - Controle de Acesso Inteligente
 
+## Docker (recomendado)
+
+### Pré-requisitos
+
+- [Docker](https://docs.docker.com/engine/install/) e [Docker Compose](https://docs.docker.com/compose/install/) instalados
+- Arduino conectado via USB (opcional, a aplicação funciona sem)
+
+### Executar
+
+```bash
+docker compose up -d
+```
+
+A aplicação estará disponível em `http://localhost:3000`.
+
+### Parar
+
+```bash
+docker compose down
+```
+
+### Arduino conectado
+
+Se tiver um Arduino conectado via USB em `/dev/ttyUSB0`, descomente no `docker-compose.yml`:
+
+```yaml
+    # devices:
+    #   - /dev/ttyUSB0:/dev/ttyUSB0
+```
+
+Caso a porta serial seja diferente, ajuste a variável `SERIAL_PORT` no mesmo arquivo.
+
+---
+
+## Execução manual
+
+### Variáveis de ambiente
+
+Copie o arquivo de exemplo e ajuste:
+
+```bash
+cp .env.example .env
+```
+
+### Banco de dados
+
+Crie o banco MySQL com o schema:
+
+```bash
+mysql -u root -p < src/database/script.sql
+```
+
+### Instalar dependências
+
+```bash
+npm install
+```
+
+### Iniciar servidor
+
+```bash
+npm run dev
+```
+
+---
+
 ## Base URL
 
 ```

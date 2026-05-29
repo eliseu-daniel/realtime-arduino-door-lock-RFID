@@ -21,7 +21,7 @@ function getPool() {
 async function query(sql, params) {
   const conn = await getPool().getConnection();
   try {
-    const [results] = await conn.execute(sql, params);
+    const [results] = await conn.query(sql, params);
     return results;
   } finally {
     conn.release();
