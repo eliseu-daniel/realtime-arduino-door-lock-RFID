@@ -4,6 +4,12 @@ const { verifyToken } = require('../utils/jwt');
 let wss = null;
 const clients = new Map();
 
+let openGateHandler = null;
+
+function onOpenGate(handler) {
+  openGateHandler = handler;
+}
+
 function createWebSocketServer(server) {
   wss = new WebSocketServer({ server });
 
@@ -64,6 +70,7 @@ function handleMessage(ws, data) {
   switch (data.event) {
     case 'OPEN_GATE':
       broadcast({ event: 'OPEN_GATE', user: ws.user });
+      if (openGateHandler) openGateHandler(ws.user);
       break;
     default:
       sendTo(ws, { event: 'ERRO', message: `Evento desconhecido: ${data.event}` });
@@ -90,4 +97,4 @@ function getWss() {
   return wss;
 }
 
-module.exports = { createWebSocketServer, broadcast, sendTo, getWss };
+module.exports = { createWebSocketServer, broadcast, sendTo, getWss, onOpenGate };
