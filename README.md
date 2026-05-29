@@ -1,72 +1,131 @@
 # API - Controle de Acesso Inteligente
 
-## Docker (recomendado)
-
-### Pré-requisitos
-
-- [Docker](https://docs.docker.com/engine/install/) e [Docker Compose](https://docs.docker.com/compose/install/) instalados
-- Arduino conectado via USB (opcional, a aplicação funciona sem)
-
-### Executar
-
-```bash
-docker compose up -d
-```
-
-A aplicação estará disponível em `http://localhost:3000`.
-
-### Parar
-
-```bash
-docker compose down
-```
-
-### Arduino conectado
-
-Se tiver um Arduino conectado via USB em `/dev/ttyUSB0`, descomente no `docker-compose.yml`:
-
-```yaml
-    # devices:
-    #   - /dev/ttyUSB0:/dev/ttyUSB0
-```
-
-Caso a porta serial seja diferente, ajuste a variável `SERIAL_PORT` no mesmo arquivo.
+Sistema de controle de acesso com Arduino RFID, comunicação em tempo real via WebSocket e aplicativo React Native.
 
 ---
 
-## Execução manual
+## 📋 Pré-requisitos
 
-### Variáveis de ambiente
+- **Node.js 20+** (recomendado) ou **Node.js 18+** (mínimo)
+- **MySQL 8.0**
+- **npm**
 
-Copie o arquivo de exemplo e ajuste:
+> ⚠️ O `node --watch` (usado no `npm run dev`) está disponível nativamente a partir do Node.js 18. Versões anteriores não são suportadas.
+
+---
+
+## 🚀 Rodar Localmente (Manual)
+
+### 1. Clone o repositório
+
+```bash
+git clone <seu-repositorio>
+cd arduino-realtime-saulo
+```
+
+### 2. Configure as variáveis de ambiente
 
 ```bash
 cp .env.example .env
 ```
 
-### Banco de dados
+Edite o arquivo `.env` com as configurações do seu banco MySQL:
 
-Crie o banco MySQL com o schema:
+```env
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=root
+DB_NAME=controle_acesso
+```
+
+### 3. Crie o banco de dados
 
 ```bash
 mysql -u root -p < src/database/script.sql
 ```
 
-### Instalar dependências
+### 4. Instale as dependências
 
 ```bash
 npm install
 ```
 
-### Iniciar servidor
+### 5. Inicie o servidor (com hot reload)
 
 ```bash
 npm run dev
 ```
 
+A aplicação estará disponível em `http://localhost:3000`.
+
+> O modo dev usa `node --watch` (nativo do Node.js 18+) para reiniciar automaticamente o servidor ao detectar alterações nos arquivos.
+
+### 6. (Opcional) Conectar Arduino via USB
+
+Com o Arduino conectado em `/dev/ttyUSB0`, ajuste no `.env`:
+
+```env
+SERIAL_PORT=/dev/ttyUSB0
+SERIAL_BAUD_RATE=9600
+```
+
+Se a porta for diferente (ex: `COM3` no Windows, `/dev/ttyACM0` no Linux), ajuste `SERIAL_PORT`.
+
 ---
 
-## Deploy em nuvem (upgrade futuro)
+## 🐳 Rodar com Docker (recomendado)
+
+O Docker sobe o MySQL + a aplicação com um único comando.
+
+### 1. Pré-requisitos
+
+- [Docker](https://docs.docker.com/engine/install/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+
+### 2. Execute
+
+```bash
+docker compose up -d
+```
+
+Isso vai:
+- Criar o container **MySQL 8.0** com o schema já inicializado
+- Buildar e iniciar a **aplicação Node.js**
+- Expor a API em `http://localhost:3000`
+
+### 3. Acompanhar os logs
+
+```bash
+docker compose logs -f app
+```
+
+### 4. Parar os containers
+
+```bash
+docker compose down
+```
+
+Para remover também o volume do banco:
+
+```bash
+docker compose down -v
+```
+
+### 5. Arduino conectado via USB
+
+Se tiver um Arduino conectado, descomente no `docker-compose.yml`:
+
+```yaml
+    devices:
+      - /dev/ttyUSB0:/dev/ttyUSB0
+```
+
+Caso a porta serial seja diferente, ajuste também a variável `SERIAL_PORT` no mesmo arquivo.
+
+---
+
+## ☁️ Deploy em nuvem (Serial Relay)
 
 Quando precisar que o back-end rode em um servidor cloud (VPS, AWS, etc.) mantendo o Arduino conectado via USB em uma máquina local, use o **Serial Relay**.
 
@@ -121,15 +180,13 @@ O relay abre a porta serial do Arduino, conecta no WebSocket do servidor cloud e
 
 ---
 
-## Base URL
+## 📡 API
 
-```
-http://localhost:3000/api
-```
+**Base URL:** `http://localhost:3000/api`
 
-## Autenticação
+### Autenticação
 
-### POST /auth/register
+#### POST /auth/register
 
 Cadastro de novo usuário.
 
@@ -162,7 +219,7 @@ Cadastro de novo usuário.
 
 ---
 
-### POST /auth/login
+#### POST /auth/login
 
 **Payload:**
 
@@ -189,7 +246,7 @@ Cadastro de novo usuário.
 
 ---
 
-### GET /auth/me
+#### GET /auth/me
 
 Retorna dados do usuário autenticado.
 
@@ -210,9 +267,9 @@ Retorna dados do usuário autenticado.
 
 ---
 
-## Dispositivos
+### Dispositivos
 
-### GET /devices
+#### GET /devices
 
 Lista todos os dispositivos.
 
@@ -220,7 +277,7 @@ Lista todos os dispositivos.
 
 ---
 
-### POST /devices
+#### POST /devices
 
 Cria um novo dispositivo. (Admin apenas)
 
@@ -237,7 +294,7 @@ Cria um novo dispositivo. (Admin apenas)
 
 ---
 
-### PUT /devices/:id
+#### PUT /devices/:id
 
 Atualiza um dispositivo. (Admin apenas)
 
@@ -245,7 +302,7 @@ Atualiza um dispositivo. (Admin apenas)
 
 ---
 
-### DELETE /devices/:id
+#### DELETE /devices/:id
 
 Remove um dispositivo. (Admin apenas)
 
@@ -253,9 +310,9 @@ Remove um dispositivo. (Admin apenas)
 
 ---
 
-## Logs de Acesso
+### Logs de Acesso
 
-### GET /logs
+#### GET /logs
 
 Lista todos os logs.
 
@@ -265,25 +322,25 @@ Lista todos os logs.
 
 ---
 
-### GET /logs/:id
+#### GET /logs/:id
 
 Retorna um log específico.
 
 ---
 
-### GET /logs/device/:deviceId
+#### GET /logs/device/:deviceId
 
 Logs filtrados por dispositivo.
 
 ---
 
-### GET /logs/user/:userId
+#### GET /logs/user/:userId
 
 Logs filtrados por usuário.
 
 ---
 
-## WebSocket
+## 🔌 WebSocket
 
 **Conexão:** `ws://localhost:3000`
 
@@ -319,7 +376,7 @@ Enviar após conectar:
 
 ---
 
-## Comandos Seriais (Arduino)
+## 🔧 Comandos Seriais (Arduino)
 
 ### Recebidos do Arduino
 
