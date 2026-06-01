@@ -59,56 +59,76 @@ async function processSerialData(data) {
 
   switch (event) {
     case 'TAG_LIDA':
-      await accessLogService.create({
-        device_id: device?.id || null,
-        uid_tag: uid || null,
-        evento: 'TAG_LIDA',
-        origem: 'RFID',
-        observacao: `Tag RFID lida: ${uid}`,
-      });
-      broadcast({ event: 'TAG_LIDA', uid, device_id: device?.id });
+      try {
+        await accessLogService.create({
+          device_id: device?.id || null,
+          uid_tag: uid || null,
+          evento: 'TAG_LIDA',
+          origem: 'RFID',
+          observacao: `Tag RFID lida: ${uid}`,
+        });
+        broadcast({ event: 'TAG_LIDA', uid, device_id: device?.id });
+      } catch (err) {
+        console.error('[SERIAL] Erro ao criar log TAG_LIDA:', err.message);
+      }
       break;
 
     case 'ACESSO_PERMITIDO':
-      await accessLogService.create({
-        device_id: device?.id || null,
-        uid_tag: uid || null,
-        evento: 'ACESSO_PERMITIDO',
-        origem: 'RFID',
-        observacao: uid ? `Acesso permitido para tag: ${uid}` : 'Acesso permitido',
-      });
-      broadcast({ event: 'ACESSO_PERMITIDO', uid, device_id: device?.id });
+      try {
+        await accessLogService.create({
+          device_id: device?.id || null,
+          uid_tag: uid || null,
+          evento: 'ACESSO_PERMITIDO',
+          origem: 'RFID',
+          observacao: uid ? `Acesso permitido para tag: ${uid}` : 'Acesso permitido',
+        });
+        broadcast({ event: 'ACESSO_PERMITIDO', uid, device_id: device?.id });
+      } catch (err) {
+        console.error('[SERIAL] Erro ao criar log ACESSO_PERMITIDO:', err.message);
+      }
       break;
 
     case 'ACESSO_NEGADO':
-      await accessLogService.create({
-        device_id: device?.id || null,
-        uid_tag: uid || null,
-        evento: 'ACESSO_NEGADO',
-        origem: 'RFID',
-        observacao: uid ? `Acesso negado para tag: ${uid}` : 'Acesso negado',
-      });
-      broadcast({ event: 'ACESSO_NEGADO', uid, device_id: device?.id });
+      try {
+        await accessLogService.create({
+          device_id: device?.id || null,
+          uid_tag: uid || null,
+          evento: 'ACESSO_NEGADO',
+          origem: 'RFID',
+          observacao: uid ? `Acesso negado para tag: ${uid}` : 'Acesso negado',
+        });
+        broadcast({ event: 'ACESSO_NEGADO', uid, device_id: device?.id });
+      } catch (err) {
+        console.error('[SERIAL] Erro ao criar log ACESSO_NEGADO:', err.message);
+      }
       break;
 
     case 'PORTAO_ABERTO':
-      await accessLogService.create({
-        device_id: device?.id || null,
-        evento: 'PORTAO_ABERTO',
-        origem: 'RFID',
-        observacao: 'Portão aberto via RFID',
-      });
-      broadcast({ event: 'PORTAO_ABERTO', device_id: device?.id });
+      try {
+        await accessLogService.create({
+          device_id: device?.id || null,
+          evento: 'PORTAO_ABERTO',
+          origem: 'RFID',
+          observacao: 'Portão aberto via RFID',
+        });
+        broadcast({ event: 'PORTAO_ABERTO', device_id: device?.id });
+      } catch (err) {
+        console.error('[SERIAL] Erro ao criar log PORTAO_ABERTO:', err.message);
+      }
       break;
 
     case 'PORTAO_FECHADO':
-      await accessLogService.create({
-        device_id: device?.id || null,
-        evento: 'PORTAO_FECHADO',
-        origem: 'RFID',
-        observacao: 'Portão fechado',
-      });
-      broadcast({ event: 'PORTAO_FECHADO', device_id: device?.id });
+      try {
+        await accessLogService.create({
+          device_id: device?.id || null,
+          evento: 'PORTAO_FECHADO',
+          origem: 'RFID',
+          observacao: 'Portão fechado',
+        });
+        broadcast({ event: 'PORTAO_FECHADO', device_id: device?.id });
+      } catch (err) {
+        console.error('[SERIAL] Erro ao criar log PORTAO_FECHADO:', err.message);
+      }
       break;
 
     default:

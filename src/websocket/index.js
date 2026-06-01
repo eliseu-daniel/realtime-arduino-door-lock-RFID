@@ -1,5 +1,6 @@
 const { WebSocketServer } = require('ws');
 const { verifyToken } = require('../utils/jwt');
+const accessLogService = require('../services/accessLogService');
 
 let wss = null;
 const clients = new Map();
@@ -71,6 +72,15 @@ function handleMessage(ws, data) {
     case 'OPEN_GATE':
       broadcast({ event: 'OPEN_GATE', user: ws.user });
       if (openGateHandler) openGateHandler(ws.user);
+      // Registrar log de abertura remota
+      accessLogService.create({
+        user_id: ws.user?.id || null,
+        evento: 'ABERTURA_REMOTA',
+        origem: 'MOBILE',
+        observacao: `Porta aberta remotamente por ${ws.user?.email || 'desconhecido'}`,
+      }).catch(err => {
+        console.error('[WS] Erro ao registrar log ABERTURA_REMOTA:', err.message);
+      });
       break;
     default:
       sendTo(ws, { event: 'ERRO', message: `Evento desconhecido: ${data.event}` });

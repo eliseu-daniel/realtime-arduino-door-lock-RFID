@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS devices (
 
 -- ---------------------------------------------------------------
 -- Tabela: access_logs
--- Registra todas as ocorrências relacionadas ao controle de acesso
+-- Registra todas as ocorrências relacionadas ao controle de acesso (RFID/Porta)
 -- ---------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS access_logs (
   id         INT AUTO_INCREMENT PRIMARY KEY,
@@ -67,4 +67,30 @@ CREATE TABLE IF NOT EXISTS access_logs (
   INDEX idx_logs_data   (created_at),
   CONSTRAINT fk_logs_user   FOREIGN KEY (user_id)   REFERENCES users(id)   ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT fk_logs_device FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------
+-- Tabela: system_logs
+-- Audit trail completo do sistema - rastreia todas as ações dos usuários
+-- ---------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS system_logs (
+  id           INT AUTO_INCREMENT PRIMARY KEY,
+  user_id      INT NULL,
+  acao         VARCHAR(255) NOT NULL,
+  recurso      VARCHAR(255) NOT NULL,
+  metodo       ENUM('GET', 'POST', 'PUT', 'PATCH', 'DELETE') NOT NULL,
+  rota         VARCHAR(500) NOT NULL,
+  status_code  INT NULL,
+  ip_address   VARCHAR(45) NULL,
+  user_agent   TEXT NULL,
+  detalhes     JSON NULL,
+  resultado    ENUM('sucesso', 'erro', 'pendente') NOT NULL DEFAULT 'pendente',
+  mensagem     TEXT NULL,
+  created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_system_logs_user     (user_id),
+  INDEX idx_system_logs_acao     (acao),
+  INDEX idx_system_logs_recurso  (recurso),
+  INDEX idx_system_logs_data     (created_at),
+  INDEX idx_system_logs_resultado (resultado),
+  CONSTRAINT fk_system_logs_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

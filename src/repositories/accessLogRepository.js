@@ -58,11 +58,17 @@ const accessLogRepository = {
   },
 
   async create({ user_id, device_id, uid_tag, evento, origem, observacao }) {
-    const result = await query(
-      'INSERT INTO ?? (user_id, device_id, uid_tag, evento, origem, observacao) VALUES (?, ?, ?, ?, ?, ?)',
-      [TABLE, user_id || null, device_id || null, uid_tag || null, evento, origem, observacao || null]
-    );
-    return this.findById(result.insertId);
+    try {
+      const result = await query(
+        'INSERT INTO ?? (user_id, device_id, uid_tag, evento, origem, observacao) VALUES (?, ?, ?, ?, ?, ?)',
+        [TABLE, user_id || null, device_id || null, uid_tag || null, evento, origem, observacao || null]
+      );
+      console.log('[AccessLog] Log criado com sucesso. ID:', result.insertId);
+      return this.findById(result.insertId);
+    } catch (error) {
+      console.error('[AccessLog] Erro ao criar log:', error.message, error.code);
+      throw error;
+    }
   },
 };
 
